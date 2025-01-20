@@ -177,7 +177,7 @@ void BasicStepperDriver::startMove(long steps, long time){
     default:
         steps_to_cruise = 0;
         steps_to_brake = 0;
-        step_pulse = cruise_step_pulse = STEP_PULSE(motor_steps, microsteps, rpm);
+        step_pulse = cruise_step_pulse = STEP_PULSE(motor_steps, 1, rpm);
         if (time > steps_remaining * step_pulse){
             step_pulse = (float)time / steps_remaining;
         }
@@ -309,25 +309,44 @@ void BasicStepperDriver::calcStepPulse(void){
  * Yield to step control
  * Toggle step and return time until next change is needed (micros)
  */
-long BasicStepperDriver::nextAction(void){
-    if (steps_remaining > 0){
-        delayMicros(next_action_interval, last_action_end);
-        /*
-         * DIR pin is sampled on rising STEP edge, so it is set first
-         */
+long BasicStepperDriver::nextAction(bool block) {
+    if (steps_remaining > 0)
+    {
+        if (block)
+            delayMicros(next_action_interval, last_action_end);
+        else
+        {
+            unsigned long now = micros();
+
+            long delay =  (last_action_end + next_action_interval) - now;
+
+            if (delay > 0)
+                return delay;
+        }
+
+        // DIR pin is sampled on rising STEP edge, so it is set first
         digitalWrite(dir_pin, dir_state);
         digitalWrite(step_pin, HIGH);
-        unsigned m = micros();
-        unsigned long pulse = step_pulse; // save value because calcStepPulse() will overwrite it
+
+        // save value because calcStepPulse() will overwrite it
+        unsigned long pulse = step_pulse;
         calcStepPulse();
-        // We should pull HIGH for at least 1-2us (step_high_min)
-        delayMicros(step_high_min);
+
+        // Rely on the the calStepPulse function to produce a small delay
+        // for the step high pulse
         digitalWrite(step_pin, LOW);
-        // account for calcStepPulse() execution time; sets ceiling for max rpm on slower MCUs
-        last_action_end = micros();
-        m = last_action_end - m;
-        next_action_interval = (pulse > m) ? pulse - m : 1;
-    } else {
+
+        // Base last_action_end on the expected time the event should
+        // happen to smooth out jitter caused by timing clicks arriving late
+        if (last_action_end == 0)
+            last_action_end = micros();
+        else
+            last_action_end += next_action_interval;
+
+        next_action_interval = pulse;
+    }
+    else
+    {
         // end of move
         last_action_end = 0;
         next_action_interval = 0;

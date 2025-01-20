@@ -35,7 +35,7 @@ public:
     struct Profile {
         Mode mode = CONSTANT_SPEED;
         short accel = 1000;     // acceleration [steps/s^2]
-        short decel = 1000;     // deceleration [steps/s^2]    
+        short decel = 1000;     // deceleration [steps/s^2]
     };
     static inline void delayMicros(unsigned long delay_us, unsigned long start_us = 0){
         if (delay_us){
@@ -199,7 +199,7 @@ public:
     /*
      * Toggle step at the right time and return time until next change is needed (micros)
      */
-    long nextAction(void);
+    long nextAction(bool block = false);
     /*
      * Optionally, call this to begin braking (and then stop) early
      * For constant speed, this is the same as stop()
