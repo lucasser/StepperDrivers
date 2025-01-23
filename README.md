@@ -1,8 +1,5 @@
-[![arduino-library-badge](https://www.ardu-badge.com/badge/StepperDriver.svg?)](https://www.ardu-badge.com/StepperDriver)
-[![Actions Status](https://github.com/laurb9/StepperDriver/workflows/PlatformIO/badge.svg)](https://github.com/laurb9/StepperDriver/actions)
-[![Actions Status](https://github.com/laurb9/StepperDriver/workflows/Arduino/badge.svg)](https://github.com/laurb9/StepperDriver/actions)
-
 StepperDriver
+Forked from [Stepper Driver](https://github.com/laurb9/StepperDriver) to add support for more drivers, make improvements, and include a stepper motor wrapper class to use in [ChopOSprint](https://github.com/lucasser/ChopOSprint)
 =============
 
 A4988, DRV8825, DRV8834, DRV8880 and generic two-pin stepper motor driver library.
