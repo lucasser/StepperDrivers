@@ -310,18 +310,17 @@ void BasicStepperDriver::calcStepPulse(void){
  * Toggle step and return time until next change is needed (micros)
  */
 long BasicStepperDriver::nextAction(bool block) {
-    if (steps_remaining > 0)
-    {
-        if (block)
+    if (steps_remaining > 0) {
+        if (block) {
             delayMicros(next_action_interval, last_action_end);
-        else
-        {
+        } else {
             unsigned long now = micros();
 
             long delay =  (last_action_end + next_action_interval) - now;
 
-            if (delay > 0)
+            if (delay > 0) {
                 return delay;
+            }
         }
 
         // DIR pin is sampled on rising STEP edge, so it is set first
@@ -331,6 +330,8 @@ long BasicStepperDriver::nextAction(bool block) {
         // save value because calcStepPulse() will overwrite it
         unsigned long pulse = step_pulse;
         calcStepPulse();
+
+        delayMicros(step_high_min);
 
         // Rely on the the calStepPulse function to produce a small delay
         // for the step high pulse
@@ -344,13 +345,12 @@ long BasicStepperDriver::nextAction(bool block) {
             last_action_end += next_action_interval;
 
         next_action_interval = pulse;
-    }
-    else
-    {
+    } else {
         // end of move
         last_action_end = 0;
         next_action_interval = 0;
     }
+
     return next_action_interval;
 }
 
